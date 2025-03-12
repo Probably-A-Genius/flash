@@ -66,9 +66,11 @@
         let currentProblem = 0;
         let startTime;
         let results = [];
+        let totalSum = 0;
 
         function generateProblem(digits) {
             let num = Math.floor(Math.random() * (10 ** digits));
+            totalSum += num;
             return num;
         }
 
@@ -76,6 +78,7 @@
             problems = [];
             results = [];
             currentProblem = 0;
+            totalSum = 0;
             let digits = parseInt(document.getElementById('digits').value);
             let interval = parseInt(document.getElementById('interval').value);
             let numProblems = parseInt(document.getElementById('numProblems').value);
@@ -97,18 +100,14 @@
                     currentProblem++;
                     if (currentProblem < problems.length) {
                         showProblem(interval);
-                    } else {
-                        showResults();
                     }
                 }, interval);
             }
         }
 
         function checkAnswer() {
-            if (currentProblem === problems.length) return;
-
             let answer = parseInt(document.getElementById('answer').value);
-            if (answer === problems.reduce((a, b) => a + b, 0)) {
+            if (currentProblem === problems.length && answer === totalSum) {
                 let timeSpent = Date.now() - startTime;
                 results.push(timeSpent);
                 showResults();
