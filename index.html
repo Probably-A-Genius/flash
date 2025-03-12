@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flash Anzan Trainer</title>
+    <style>
+        body {
+            background-color: black;
+            color: limegreen;
+            font-family: monospace;
+            text-align: center;
+            font-size: 24px;
+            margin: 0;
+            padding: 20px;
+        }
+        #problem {
+            font-size: 3em;
+            margin: 20px 0;
+            height: 100px;
+        }
+        input {
+            background-color: black;
+            color: limegreen;
+            border: none;
+            border-bottom: 2px solid limegreen;
+            font-size: 2em;
+            text-align: center;
+            outline: none;
+            width: 200px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: limegreen;
+            color: black;
+            font-size: 1.5em;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 10px;
+        }
+        button:hover {
+            background-color: #33ff33;
+        }
+    </style>
+</head>
+<body>
+    <h1>Flash Anzan Trainer</h1>
+    <div>
+        <label>Digits:</label>
+        <input type="number" id="digits" value="2" min="1" max="5">
+        <label>Interval (ms):</label>
+        <input type="number" id="interval" value="1000" min="100">
+        <label>Number of Problems:</label>
+        <input type="number" id="numProblems" value="5" min="1">
+        <button onclick="startGame()">Start</button>
+    </div>
+
+    <div id="problem"></div>
+
+    <input type="number" id="answer" placeholder="Enter answer..." oninput="checkAnswer()">
+
+    <script>
+        let problems = [];
+        let currentProblem = 0;
+        let startTime;
+        let results = [];
+
+        function generateProblem(digits) {
+            let num = Math.floor(Math.random() * (10 ** digits));
+            return num;
+        }
+
+        function startGame() {
+            problems = [];
+            results = [];
+            currentProblem = 0;
+            let digits = parseInt(document.getElementById('digits').value);
+            let interval = parseInt(document.getElementById('interval').value);
+            let numProblems = parseInt(document.getElementById('numProblems').value);
+
+            for (let i = 0; i < numProblems; i++) {
+                problems.push(generateProblem(digits));
+            }
+
+            document.getElementById('answer').value = '';
+            startTime = Date.now();
+            showProblem(interval);
+        }
+
+        function showProblem(interval) {
+            if (currentProblem < problems.length) {
+                document.getElementById('problem').innerText = problems[currentProblem];
+                setTimeout(() => {
+                    document.getElementById('problem').innerText = '';
+                    currentProblem++;
+                    if (currentProblem < problems.length) {
+                        showProblem(interval);
+                    } else {
+                        showResults();
+                    }
+                }, interval);
+            }
+        }
+
+        function checkAnswer() {
+            if (currentProblem === problems.length) return;
+
+            let answer = parseInt(document.getElementById('answer').value);
+            if (answer === problems.reduce((a, b) => a + b, 0)) {
+                let timeSpent = Date.now() - startTime;
+                results.push(timeSpent);
+                showResults();
+            }
+        }
+
+        function showResults() {
+            let mean = (results.reduce((a, b) => a + b, 0) / results.length).toFixed(2);
+            let fastest = Math.min(...results);
+            let slowest = Math.max(...results);
+
+            let resultHtml = `<h2>Results</h2>`;
+            resultHtml += `<p>Set Mean Time: ${mean} ms</p>`;
+            resultHtml += `<p>Fastest Time: ${fastest} ms</p>`;
+            resultHtml += `<p>Slowest Time: ${slowest} ms</p>`;
+            resultHtml += `<h3>Problem Times:</h3>`;
+            results.forEach((time, i) => {
+                resultHtml += `<p>Problem ${i + 1}: ${time} ms</p>`;
+            });
+
+            document.body.innerHTML = resultHtml;
+        }
+    </script>
+</body>
+</html>
